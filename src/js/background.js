@@ -58,6 +58,7 @@ chrome.windows.onRemoved.addListener(function(windowId) {
 // again.
 chrome.windows.onFocusChanged.addListener(function(windowId) {
 	// clear all notifications
+	console.log('here')
 	chrome.notifications.getAll(function(notifications) {
 		var n = Object.keys(notifications);
 		for (var i = 0; i < n.length; i++) { 

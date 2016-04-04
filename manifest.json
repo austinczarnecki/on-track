@@ -23,7 +23,7 @@
   },
 
   "background": {
-    "scripts": ["src/js/background.js"]
+    "page": "src/background.html"
   },
 
   "options_page": "src/options.html"
