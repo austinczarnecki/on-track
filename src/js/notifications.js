@@ -1,6 +1,11 @@
 // check periodically if a notification should be shown and show it if the current
 // tab has been open in total for the day longer than the configured notificationThreshold
 
+'use strict';
+
+/* ===================================================== */
+// NOTIFICATION LISTENERS
+
 const NOTIFICATION_TIMER = 5000; // check every 5 seconds if a notification needs to be sent
 
 setInterval(function() {
@@ -21,28 +26,28 @@ setInterval(function() {
 	});
 }, NOTIFICATION_TIMER);
 
-function beautifyTime(time) {
-	var val = 'second'
-	time = time / 1000;
+chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
+	if (buttonIndex === 0) {
+		chrome.tabs.remove(parseInt(notificationId));
+		chrome.notifications.clear(notificationId);
+	} else if (buttonIndex === 1) {
+		var domain;
+		var nextNotificationTime = Date.now();
 
-	if (time >= 60) {
-		time = time / 60;
-		val = 'minute';
-	}
-	if (time >= 60 && val == 'minute') {
-		time = time / 60;
-		val = 'hour';
-	}
-	if (time >= 24 && val == 'hour') {
-		time = time / 24;
-		val = 'day';
-	}
-	if (Math.floor(time) > 1) {
-		val += 's';
-	}
+		chrome.tabs.get(parseInt(notificationId), function(tab) {
+			storage.getOptions(function(options) {
+				domain = extractDomain(tab.url);
+				nextNotificationTime = new Date(nextNotificationTime + (options.notificationDelay * 60 * 1000));
+				storage.setDelayUntilValueForDomain(domain, nextNotificationTime);
+			});
+		});
 
-	return {time: time, text: val};
-}
+		chrome.notifications.clear(notificationId);
+	}
+});
+
+/* ===================================================== */
+// NOTIFICATION UTILITY FUNCTIONS
 
 function sendNotification(time, timestring, domain, delay, delaystring) {
 	chrome.notifications.create(activeTab.toString(), {
@@ -69,22 +74,4 @@ function clearNotifications() {
 	});
 }
 
-chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
-	if (buttonIndex === 0) {
-		chrome.tabs.remove(parseInt(notificationId));
-		chrome.notifications.clear(notificationId);
-	} else if (buttonIndex === 1) {
-		var domain;
-		var nextNotificationTime = Date.now();
-
-		chrome.tabs.get(parseInt(notificationId), function(tab) {
-			storage.getOptions(function(options) {
-				domain = extractDomain(tab.url);
-				nextNotificationTime = new Date(nextNotificationTime + (options.notificationDelay * 60 * 1000));
-				storage.setDelayUntilValueForDomain(domain, nextNotificationTime);
-			});
-		});
-
-		chrome.notifications.clear(notificationId);
-	}
-});
+/* ===================================================== */

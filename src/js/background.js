@@ -7,6 +7,9 @@ var verbose = true; // used for logging, remove when publishing
 
 // TODO: set timeout for time between load and time specified for daily refresh
 
+/* ===================================================== */
+// MAIN VARIABLES AND HELPER FUNCTIONS
+
 var activeTab,
 	activeStart,
 	activeDomain;
@@ -46,6 +49,9 @@ function storeTotalActiveTab(callback) {
 	callback();
 }
 
+/* ===================================================== */
+// WINDOW LISTENERS
+
 // when closing a window, save and clear the active tab if set
 chrome.windows.onRemoved.addListener(function(windowId) {
 	if (activeTab) {
@@ -74,6 +80,9 @@ chrome.windows.onFocusChanged.addListener(function(windowId) {
 		});
 	}
 });
+
+/* ===================================================== */
+// TAB LISTENERS
 
 // if the updated tab is the active tab and domain changed, save out the time for the 
 // previous domain, reset the counter for the active tab. Else do nothing.
@@ -130,3 +139,5 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 		setActiveStart(sender.tab);
 	}
 });
+
+/* ===================================================== */

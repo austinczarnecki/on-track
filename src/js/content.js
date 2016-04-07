@@ -1,5 +1,6 @@
 // adds an event listener that sends a message to 
 // the extension when a page loses focus
+'use strict';
 
 window.addEventListener("blur", function() {
 	console.log('focus changed on blur');
