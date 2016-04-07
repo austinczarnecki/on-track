@@ -3,7 +3,7 @@ function save_options() {
   var nt = document.getElementById('notificationThreshold').value;
   var nd = document.getElementById('notificationDelay').value;
   var notifications = document.getElementById('notifications').checked;
-  chrome.storage.sync.set({
+  storage.setOptions({
     notificationThreshold: nt,
     notificationDelay: nd,
     notifications: notifications
@@ -20,14 +20,10 @@ function save_options() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restore_options() {
-  chrome.storage.sync.get({
-    notificationThreshold: 30,
-    notificationDelay: 5,
-    notifications: true
-  }, function(items) {
-    document.getElementById('notificationThreshold').value = items.notificationThreshold;
-    document.getElementById('notificationDelay').value = items.notificationDelay;
-    document.getElementById('notifications').checked = items.notifications;
+  storage.getOptions(function(options) {
+    document.getElementById('notificationThreshold').value = options.notificationThreshold;
+    document.getElementById('notificationDelay').value = options.notificationDelay;
+    document.getElementById('notifications').checked = options.notifications;
   });
 }
 
