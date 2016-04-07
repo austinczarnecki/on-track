@@ -13,12 +13,17 @@ setInterval(function() {
 		if (!options.notifications) { return; } // short circuit if notifications are turned off
 
 		storage.getDelayUntilValueForDomain(activeDomain, function(date) {
-			var overThreshold = (localStorage.getItem(activeDomain) > options.notificationThreshold * 1000 * 60);
+			var overThreshold = (localStorage.getItem(activeDomain) > options.notificationThreshold);
 			var pastDelayUntil = (Date.now() > date);
 
+			console.log('overThreshold: ' + overThreshold);
 			if ((overThreshold && !date) || (date && pastDelayUntil)) {
 				var total = beautifyTime(localStorage.getItem(activeDomain));
-				var delay = beautifyTime(options.notificationDelay * 60 * 1000);
+				var delay = beautifyTime(options.notificationDelay);
+
+				console.log(options)
+				console.log(total)
+				console.log(delay)
 
 				sendNotification(Math.floor(total.time), total.text, activeDomain, delay.time, delay.text);
 			}
@@ -37,7 +42,7 @@ chrome.notifications.onButtonClicked.addListener(function(notificationId, button
 		chrome.tabs.get(parseInt(notificationId), function(tab) {
 			storage.getOptions(function(options) {
 				domain = extractDomain(tab.url);
-				nextNotificationTime = new Date(nextNotificationTime + (options.notificationDelay * 60 * 1000));
+				nextNotificationTime = new Date(nextNotificationTime + (options.notificationDelay));
 				storage.setDelayUntilValueForDomain(domain, nextNotificationTime);
 			});
 		});

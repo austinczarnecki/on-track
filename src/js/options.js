@@ -1,13 +1,17 @@
 'use strict';
 
 function save_options() {
-  var nt = document.getElementById('notificationThreshold').value;
-  var nd = document.getElementById('notificationDelay').value;
+  var notificationThreshold = document.getElementById('notificationThreshold').value;
+  var notificationDelay = document.getElementById('notificationDelay').value;
   var notifications = document.getElementById('notifications').checked;
+  var storeDataUntil = document.getElementById('storeDataUntil').value;
+  var storeDailyDataUntil = document.getElementById('storeDailyDataUntil').value;
   storage.setOptions({
-    notificationThreshold: nt,
-    notificationDelay: nd,
-    notifications: notifications
+    notificationThreshold: notificationThreshold,
+    notificationDelay: notificationDelay,
+    notifications: notifications,
+    storeDataUntil: storeDataUntil,
+    storeDailyDataUntil: storeDailyDataUntil
   }, function() {
     // let user know options were saved.
     var status = document.getElementById('status');
@@ -24,6 +28,8 @@ function restore_options() {
     document.getElementById('notificationThreshold').value = options.notificationThreshold;
     document.getElementById('notificationDelay').value = options.notificationDelay;
     document.getElementById('notifications').checked = options.notifications;
+    document.getElementById('storeDataUntil').value = options.storeDataUntil;
+    document.getElementById('storeDailyDataUntil').value = options.storeDailyDataUntil;
   });
 }
 

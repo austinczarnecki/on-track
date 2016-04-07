@@ -154,6 +154,7 @@ var storage = (function () {
 				typeof callback === 'function' && callback(result.delayUntil);
 			} else {
 				console.log('could not find delayUntil value for ' + domain);
+				typeof callback === 'function' && callback(null);
 			}
 		};
 		request.onerror = function(event) {};
@@ -311,10 +312,10 @@ var storage = (function () {
 		chrome.storage.sync.set({
 			'startDate': start.toString(),
 			'notifications': true,
-			'notificationThreshold': 30,
-			'notificationDelay': 5,
-			'storeDataUntil': -1,
-			'storeDailyDataUntil': 365
+			'notificationThreshold': 1800000,
+			'notificationDelay': 300000,
+			'storeDataUntil': 'f',
+			'storeDailyDataUntil': 'f'
 		});
 	});
 

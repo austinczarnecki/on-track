@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>On-track - Options</title>
+	<title>On Track - Options</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
@@ -12,28 +12,48 @@
 	<div class='options-control'>
 		Show notfications after:
 		<select id="notificationThreshold">
-			<option value=15>15 minutes</option>
-			<option value=30>30 minutes</option>
-			<option value=60>1 hour</option>
-			<option value=120>2 hours</option>
+			<option value=900000>15 minutes</option>
+			<option value=1800000>30 minutes</option>
+			<option value=3600000>1 hour</option>
+			<option value=7200000>2 hours</option>
 		</select>
 	</div>
 
 	<div class='options-control'>
 		Snooze interval between successive notifications:
 		<select id="notificationDelay">
-			<option value=1>1 minute</option>
-			<option value=5>5 minutes</option>
-			<option value=10>10 minutes</option>
-			<option value=15>15 minutes</option>
-			<option value=30>30 minutes</option>
+			<option value=60000>1 minute</option>
+			<option value=300000>5 minutes</option>
+			<option value=600000>10 minutes</option>
+			<option value=900000>15 minutes</option>
+			<option value=1800000>30 minutes</option>
+		</select>
+	</div>
+
+	<div class='options-control'>
+		Keep browsing data for:
+		<select id='storeDataUntil'>
+			<option value='w'>One week</option>
+			<option value='m'>One month</option>
+			<option value='y'>One year</option>
+			<option value='f'>As long as extension is installed</option>
+		</select>
+	</div>
+
+	<div class='options-control'>
+		Start aggregating data by month instead of by day after:
+		<select id='storeDailyDataUntil'>
+			<option value='w'>One week</option>
+			<option value='m'>One month</option>
+			<option value='y'>One year</option>
+			<option value='f'>Never</option>
 		</select>
 	</div>
 
 	<div class='options-control'>
 		<label>
-			<input type="checkbox" id="notifications">
 			Show notifications
+			<input type="checkbox" id="notifications">
 		</label>
 	</div>
 

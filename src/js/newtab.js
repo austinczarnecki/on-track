@@ -36,11 +36,11 @@ function startTimer(start, display) {
 }
 
 function displayTotals(table) {
-	tableHeader = table.createTHead();
-	hrow = tableHeader.insertRow(0);
+	var tableHeader = table.createTHead();
+	var hrow = tableHeader.insertRow(0);
 	hrow.insertCell(0).innerHTML = 'Domain';
 	hrow.insertCell(1).innerHTML = 'Time';
-	tablebody = table.appendChild(document.createElement('tbody'))
+	var tablebody = table.appendChild(document.createElement('tbody'))
 	for (var i = 0; i < localStorage.length; i++) {
 		var row = tablebody.insertRow(i);
 		row.insertCell(0).innerHTML = localStorage.key(i);
@@ -77,7 +77,7 @@ function timeToDisplay(t) {
 // pulls data about website usage from 
 function extractData() {
 	// get array of key: value pairs
-	data = []
+	var data = []
 	for (var i = 0; i < localStorage.length; i++) {
 	}
 	// sort array and return
