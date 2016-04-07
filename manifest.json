@@ -2,11 +2,11 @@
   "manifest_version": 2,
 
   "name": "OnTrack",
-  "description": "Tracks time spent by domain and visualizes that data on the newtab page",
+  "description": "Tracks time spent by domain, and visualizes that data on the newtab page",
   "version": "1.0",
 
   "browser_action": {
-    "default_icon": "assets/icons/iconT.png",
+    "default_icon": "assets/icons/icon.png",
     "default_popup": "src/popup.html"
   },
 

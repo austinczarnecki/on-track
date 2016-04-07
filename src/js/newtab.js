@@ -1,5 +1,6 @@
 // takes an amount of time in miliseconds for START, and displays a timer counting up
 // TODO: pause timer when window is not in focus
+
 function startTimer(start, display) {
 	var s = Date.now();
     var diff,

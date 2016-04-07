@@ -1,6 +1,8 @@
 // check periodically if a notification should be shown and show it if the current
 // tab has been open in total for the day longer than the configured notificationThreshold
 
+const NOTIFICATION_TIMER = 5000; // check every 5 seconds if a notification needs to be sent
+
 setInterval(function() {
 	storage.getOptions(function(options) {
 		if (!options.notifications) { return; } // short circuit if notifications are turned off
@@ -17,9 +19,9 @@ setInterval(function() {
 			}
 		});
 	});
-}, 4000);
+}, NOTIFICATION_TIMER);
 
-beautifyTime = function(time) {
+function beautifyTime(time) {
 	var val = 'second'
 	time = time / 1000;
 
@@ -42,10 +44,10 @@ beautifyTime = function(time) {
 	return {time: time, text: val};
 }
 
-sendNotification = function(time, timestring, domain, delay, delaystring) {
+function sendNotification(time, timestring, domain, delay, delaystring) {
 	chrome.notifications.create(activeTab.toString(), {
 		type: "basic", 
-	 	iconUrl: "../../assets/icons/iconTsquare.png", 
+	 	iconUrl: "../../assets/icons/icon.png", 
 	 	title: "You've spent over " + time + " " + timestring + " on " + domain + " today",
 	 	// message: "In that time you could read almost 45 pages of a good book",
 	 	message: "",
@@ -55,6 +57,15 @@ sendNotification = function(time, timestring, domain, delay, delaystring) {
 	 				{title: "Get me back on track, close the tab! (recommended)"},
 	 				{title: "Dismiss for " + delay + ' ' + delaystring}
 				 ]
+	});
+}
+
+function clearNotifications() {
+	chrome.notifications.getAll(function(notifications) {
+		var n = Object.keys(notifications);
+		for (var i = 0; i < n.length; i++) { 
+			chrome.notifications.clear(n[i]);
+		}
 	});
 }
 
