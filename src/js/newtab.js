@@ -2,6 +2,8 @@
 // TODO: pause timer when window is not in focus
 
 'use strict';
+	
+var timerHandle;
 
 function startTimer(start, display) {
 	var s = Date.now();
@@ -32,10 +34,25 @@ function startTimer(start, display) {
     };
 
     timer();
-    setInterval(timer, 1000);
+    var result = setInterval(timer, 1000);
+    return result;
+};
+
+function clearTimer(timer) {
+	if (timer) {
+		clearInterval(timer);
+	}
 }
 
-function displayTotals(table, data) {
+function displayTotals(container, data) {
+	
+	if (document.querySelector('#totals-table')) {
+    	document.querySelector('#totals-table').remove();
+    }
+
+	var table = container.appendChild(document.createElement('table'));
+	table.setAttribute('id', 'totals-table');
+
 	var tableHeader = table.createTHead();
 	var hrow = tableHeader.insertRow(0);
 
@@ -47,7 +64,9 @@ function displayTotals(table, data) {
 	for (var i = 0; i < data.length; i++) {
 		var row = tablebody.insertRow(i);
 		row.insertCell(0).innerHTML = data[i].domain;
-		row.insertCell(1).innerHTML = timeToDisplay(parseInt(data[i].timeSpentTotal));
+
+		var time = beautifyTime(parseInt(data[i].timeSpentTotal));
+		row.insertCell(1).innerHTML = Math.floor(time.time) + ' ' + time.text;
 	}
 }
 
@@ -80,20 +99,46 @@ function timeToDisplay(t) {
 	return [d , pad(h) , pad(m) , pad(s)];
 }
 
-window.onload = function () {
-    var display = document.querySelector('#time');
-    var table = document.querySelector('#totals');
+function loadContent() {
+	var display = document.querySelector('#time');
+    // var table = document.querySelector('#table-container');
 
-    storage.onDatabaseLoaded(timer);
+    storage.onDatabaseLoaded(initialize);
 
-    function timer() {
+    function initialize() {
     	storage.exportDatabase(function(data) {
 	    	var total = 0;
+
+	    	// add up total
 	    	for (var i = 0; i < data.length; i++) {
 	    		total += parseInt(data[i].timeSpentTotal);
 	    	}
-	    	startTimer(total, display);
-	    	displayTotals(table, data);
+
+	    	// sort the data for graphing
+	    	data.sort(function(a, b) {
+	    		return b.timeSpentTotal - a.timeSpentTotal;
+	    	});
+
+	    	// filter out non-web urls (extensions, newtab, etc.)
+	    	data = data.filter(function(elem) {
+	    		return elem.domain.indexOf('.') !== -1;
+	    	});
+
+	    	clearTimer(timerHandle);
+	    	timerHandle = startTimer(total, display);
+	    	renderBarChart(data.slice(0,16));
 	    });
     };
+};
+
+window.onload = function () {
+    loadContent();
 }
+
+window.addEventListener('focus', function() {
+	loadContent();
+});
+
+window.addEventListener('blur', function() {
+	loadContent();
+});
