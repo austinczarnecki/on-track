@@ -87,6 +87,25 @@ var storage = (function () {
 		}
 	};
 
+
+	DB.prototype.removeDomain = function(domain, callback) {
+		if (typeof domain !== 'string') { throw 'Error: DOMAIN passed to removeDomain() must be a string'; };
+
+		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
+		var request = objectStore.index('domain').get(domain);
+
+		request.onsuccess = function(event) {
+			var deleteRequest = objectStore.delete(event.target.result.id);
+			deleteRequest.onsuccess = function(event) {
+				console.log('deleted domain');
+			};
+			deleteRequest.onerror = function(event) {
+				throw 'failed to delete domain';
+			};
+		};
+		request.onerror = function(event) {};
+	};
+
 	// get full record for a domain, calls callback passing in the result
 	DB.prototype.getDomainEntry = function(domain, callback) {
 		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
@@ -197,7 +216,10 @@ var storage = (function () {
 		}
 		if (typeof time !== 'number') {
 			throw 'Error: TIME passed to addTimeSpentToDomain() must be a number';
-		};
+		}
+		if (time < 0) {
+			throw 'Error: cannot add a negative length of time';
+		}
 
 		// for now only increment a single time-spent attribute
 		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
