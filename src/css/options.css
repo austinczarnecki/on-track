@@ -1,0 +1,10 @@
+#options {
+	display: block;
+}
+#status {
+	margin-left: 5px;
+}
+.options-control {
+	margin: 5px;
+	font-size: 14px;
+}

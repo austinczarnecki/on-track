@@ -66,7 +66,7 @@ function renderBarChart(data) {
     d.timeSpentTotal = +d.timeSpentTotal;
     return d;
   }
-  
+
   function toMinutes(d) {
     return d / (60 * 1000);
   }
