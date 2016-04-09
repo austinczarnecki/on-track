@@ -50,6 +50,7 @@ function displayTotals(table) {
 // takes a time in miliseconds and returns a string 
 function timeToDisplay(t) {
 	var cd, ch, cm, d, h, m, s;
+
 	cd = 24 * 60 * 60 * 1000;
 	ch = 60 * 60 * 1000;
 	cm = 60 * 1000;
@@ -57,6 +58,7 @@ function timeToDisplay(t) {
 	h = Math.floor((t - d * cd) / ch);
 	m = Math.floor((t - d * cd - h * ch) / cm);
 	s = Math.floor((t - d * cd - h * ch - m * cm) / 1000);
+
 	var pad = function(n){ return n < 10 ? '0' + n : n; };
 
 	if (s === 60) {
@@ -85,7 +87,6 @@ function extractData() {
 }
 
 window.onload = function () {
-
 	for (var i in localStorage) {
 		console.log(i + " : " + window.localStorage.getItem(i))
 	}
@@ -99,5 +100,4 @@ window.onload = function () {
 
     var table = document.querySelector('#totals');
     displayTotals(table);
-
 };

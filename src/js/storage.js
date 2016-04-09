@@ -64,7 +64,7 @@ var storage = (function () {
 	};
 
 	// add new domain to database (TODO: include defaults)
-	DB.prototype.addDomain = function(domain) {
+	DB.prototype.addDomain = function(domain, callback) {
 		if (typeof domain !== 'string') { throw 'Error: DOMAIN passed to addDomain() must be a string'; };
 
 		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
@@ -72,12 +72,13 @@ var storage = (function () {
 		var checkDomain = objectStore.index('domain').get(domain).onsuccess = function(event) {
 			var result = event.target.result;
 			if (result) {
-				console.log('existing record found for ' + result.domain + ', no record added');
+				console.log('Existing record found for ' + result.domain + ', no record added');
+				typeof callback === 'function' && callback();
 			} else {
-				// if not found, add to database			
-				var request = objectStore.add({domain: domain});
+				var request = objectStore.add({ domain: domain });
 				request.onsuccess = function(event) {
 					console.log('successfully added record for ' + domain);
+					typeof callback === 'function' && callback();
 				};
 				request.onerror = function(event) {
 					throw event.target.error;
@@ -165,6 +166,7 @@ var storage = (function () {
 		if (!(date instanceof Date)) { 
 			throw 'Error: date passed to setNotificationPolicyForDomain() must be a Date object'; 
 		};
+		console.log(date)
 
 		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
 		var request = objectStore.index('domain').get(domain);
@@ -189,52 +191,67 @@ var storage = (function () {
 	// TODO: 	Be careful about splitting time and incrementing both daily counts if record goes across 
 	// 			midnight (or theoretically) for multiple days
 	DB.prototype.addTimeSpentToDomain = function(domain, time) {
+		console.log(domain);
+		if (typeof domain !== 'string') { 
+			throw 'Error: DOMAIN passed to addTimeSpentToDomain() must be a string'; 
+		}
+		if (typeof time !== 'number') {
+			throw 'Error: TIME passed to addTimeSpentToDomain() must be a number';
+		};
+
 		// for now only increment a single time-spent attribute
 		var objectStore = db.transaction(["history"], "readwrite").objectStore("history");
 		var request = objectStore.index('domain').get(domain);
 
 		request.onsuccess = function(event) {
-			var data = request.result;
-			var end = new Date();
-			var start = new Date(end - time);
-			var dateId = end.setHours(0,0,0,0);
+			if (!request.result) {
+				storage.addDomain(domain, function() {
+					storage.addTimeSpentToDomain(domain, time);
+				});
+			} else {
 
-			// add count by day information for this domain
-			// if (start.getDate() !== end.getDate()) {
-			// 	console.log('over midnight')
+				var data = request.result;
+				var end = new Date();
+				var start = new Date(end - time);
+				var dateId = end.setHours(0,0,0,0);
 
-			// } else {
-			// 	data.count[]
-			// }
+				// add count by day information for this domain
+				// if (start.getDate() !== end.getDate()) {
+				// 	console.log('over midnight')
 
-			// initialize count tracker if it doesn't already exist and increment
-			if (!data.count) { data.count = new Object(); };
-			if (!data.count[dateId]) { data.count[dateId] = 0; };
-			data.count[dateId] ++;
+				// } else {
+				// 	data.count[]
+				// }
 
-			// initialize time spent tracker if not already there and add time
-			if (!data.timeSpent) { data.timeSpent = new Object(); };
-			if (!data.timeSpent[dateId]) { data.timeSpent[dateId] = 0; };
-			data.timeSpent[dateId] += time;
-			
-			// update grand total time spent for this domain
-			if (data.timeSpentTotal) { data.timeSpentTotal = data.timeSpentTotal + time; } 
-			else { data.timeSpentTotal = time; }
+				// initialize count tracker if it doesn't already exist and increment
+				if (!data.count) { data.count = new Object(); };
+				if (!data.count[dateId]) { data.count[dateId] = 0; };
+				data.count[dateId] ++;
 
-			// update grand total count of visits to this domain
-			if (data.countTotal) { data.countTotal++; } 
-			else { data.countTotal = 1; }
+				// initialize time spent tracker if not already there and add time
+				if (!data.timeSpent) { data.timeSpent = new Object(); };
+				if (!data.timeSpent[dateId]) { data.timeSpent[dateId] = 0; };
+				data.timeSpent[dateId] += time;
+				
+				// update grand total time spent for this domain
+				if (data.timeSpentTotal) { data.timeSpentTotal = data.timeSpentTotal + time; } 
+				else { data.timeSpentTotal = time; }
 
-			// console.log('attempting to update total timeSpent for '+ domain + ' to ' + data.timeSpentTotal);
-			// console.log('attempting to update total count for '+ domain + ' to ' + data.countTotal);
+				// update grand total count of visits to this domain
+				if (data.countTotal) { data.countTotal++; } 
+				else { data.countTotal = 1; }
 
-			var requestUpdate = objectStore.put(data).onsuccess = function(event) { 
-				console.log('successfully saved updated record for ' + domain);
-			};
+				// console.log('attempting to update total timeSpent for '+ domain + ' to ' + data.timeSpentTotal);
+				// console.log('attempting to update total count for '+ domain + ' to ' + data.countTotal);
 
-			requestUpdate.onerror = function(event) { 
-				throw 'failed to update record for ' + domain + ' with error: ' + event.target.error;
-			};
+				var requestUpdate = objectStore.put(data).onsuccess = function(event) { 
+					console.log('successfully saved updated record for ' + domain);
+				};
+
+				requestUpdate.onerror = function(event) { 
+					throw 'failed to update record for ' + domain + ' with error: ' + event.target.error;
+				};
+			}
 		};
 		request.onerror = function(event) {};
 	};

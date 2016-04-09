@@ -25,25 +25,20 @@ function setActiveStart(tab) {
 
 // takes a url and a value in miliseconds and adds that value to the 
 // existing value for that url in storage
-function storeTotal(key, value) {
-	var total = parseInt(value);
-	var global_total = total;
+function storeIncrement(domain, time) {
+	time = parseInt(time);
 
-	if ('total' in localStorage) { 
-		global_total += parseInt(localStorage.getItem('total')); 
+	try { 
+		storage.addTimeSpentToDomain(domain, time);
+	} catch(err) {
+		storage.addTimeSpentToDomain(domain, time);
 	}
-	localStorage.setItem('total', global_total);
-
-	if (key in localStorage) { 
-		total += parseInt(localStorage.getItem(key)); 
-	}
-	localStorage.setItem(key, total);
 }
 
 function storeTotalActiveTab(callback) {
 	var diff = Date.now() - activeStart;
 	if (activeDomain) {
-		storeTotal(activeDomain, diff);
+		storeIncrement(activeDomain, diff);
 		if (verbose) { console.log("stored increment: id="+activeTab+", url="+activeDomain+", time="+(diff/1000)+" seconds"); }
 	}
 	callback();

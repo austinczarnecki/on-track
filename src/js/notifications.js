@@ -9,26 +9,26 @@
 const NOTIFICATION_TIMER = 5000; // check every 5 seconds if a notification needs to be sent
 
 setInterval(function() {
-	storage.getOptions(function(options) {
-		if (!options.notifications) { return; } // short circuit if notifications are turned off
+	if (activeDomain) {
+		storage.getOptions(function(options) {
+			if (!options.notifications) { return; } // short circuit if notifications are turned off
 
-		storage.getDelayUntilValueForDomain(activeDomain, function(date) {
-			var overThreshold = (localStorage.getItem(activeDomain) > options.notificationThreshold);
-			var pastDelayUntil = (Date.now() > date);
+			storage.getDomainEntry(activeDomain, function(obj) {
+				var unrecordedTime = Date.now() - activeStart;
+				var delayUntil = obj.delayUntil ? obj.delayUntil.getTime() : 0;
 
-			console.log('overThreshold: ' + overThreshold);
-			if ((overThreshold && !date) || (date && pastDelayUntil)) {
-				var total = beautifyTime(localStorage.getItem(activeDomain));
-				var delay = beautifyTime(options.notificationDelay);
+				var overThreshold = (parseInt(obj.timeSpentTotal) + unrecordedTime > parseInt(options.notificationThreshold));
+				var pastDelayUntil = (Date.now() > parseInt(delayUntil));
+				
+				if (overThreshold && pastDelayUntil) {
+					var total = beautifyTime(unrecordedTime + parseInt(obj.timeSpentTotal));
+					var delay = beautifyTime(options.notificationDelay);
 
-				console.log(options)
-				console.log(total)
-				console.log(delay)
-
-				sendNotification(Math.floor(total.time), total.text, activeDomain, delay.time, delay.text);
-			}
+					sendNotification(Math.floor(total.time), total.text, activeDomain, delay.time, delay.text);
+				}
+			});
 		});
-	});
+	}
 }, NOTIFICATION_TIMER);
 
 chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
@@ -42,7 +42,7 @@ chrome.notifications.onButtonClicked.addListener(function(notificationId, button
 		chrome.tabs.get(parseInt(notificationId), function(tab) {
 			storage.getOptions(function(options) {
 				domain = extractDomain(tab.url);
-				nextNotificationTime = new Date(nextNotificationTime + (options.notificationDelay));
+				nextNotificationTime = new Date(nextNotificationTime + parseInt(options.notificationDelay));
 				storage.setDelayUntilValueForDomain(domain, nextNotificationTime);
 			});
 		});
