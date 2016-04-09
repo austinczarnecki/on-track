@@ -312,6 +312,17 @@ var storage = (function () {
 		};
 	};
 
+	// TODO: add db.onload function
+	DB.prototype.onDatabaseLoaded = function(callback) {
+		var checker = setInterval(function() {
+			if (db) { end(); }
+		});
+		function end() {
+			clearInterval(checker);
+			typeof callback === 'function' && callback();
+		};
+	};
+
 	/* ===================================================== */
 	// OPTIONS CONFIGURATION
 	const OPTIONS = 

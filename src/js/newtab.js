@@ -35,18 +35,22 @@ function startTimer(start, display) {
     setInterval(timer, 1000);
 }
 
-function displayTotals(table) {
+function displayTotals(table, data) {
 	var tableHeader = table.createTHead();
 	var hrow = tableHeader.insertRow(0);
+
 	hrow.insertCell(0).innerHTML = 'Domain';
 	hrow.insertCell(1).innerHTML = 'Time';
-	var tablebody = table.appendChild(document.createElement('tbody'))
-	for (var i = 0; i < localStorage.length; i++) {
+
+	var tablebody = table.appendChild(document.createElement('tbody'));
+
+	for (var i = 0; i < data.length; i++) {
 		var row = tablebody.insertRow(i);
-		row.insertCell(0).innerHTML = localStorage.key(i);
-		row.insertCell(1).innerHTML = timeToDisplay(parseInt(localStorage.getItem(localStorage.key(i))));
+		row.insertCell(0).innerHTML = data[i].domain;
+		row.insertCell(1).innerHTML = timeToDisplay(parseInt(data[i].timeSpentTotal));
 	}
 }
+
 // takes a time in miliseconds and returns a string 
 function timeToDisplay(t) {
 	var cd, ch, cm, d, h, m, s;
@@ -76,28 +80,20 @@ function timeToDisplay(t) {
 	return [d , pad(h) , pad(m) , pad(s)];
 }
 
-// pulls data about website usage from 
-function extractData() {
-	// get array of key: value pairs
-	var data = []
-	for (var i = 0; i < localStorage.length; i++) {
-	}
-	// sort array and return
-	return data;
-}
-
 window.onload = function () {
-	for (var i in localStorage) {
-		console.log(i + " : " + window.localStorage.getItem(i))
-	}
-
     var display = document.querySelector('#time');
-
-    var start = parseInt(localStorage.getItem('total'))
-    startTimer(start, display);
-
-    var data = extractData();
-
     var table = document.querySelector('#totals');
-    displayTotals(table);
-};
+
+    storage.onDatabaseLoaded(timer);
+
+    function timer() {
+    	storage.exportDatabase(function(data) {
+	    	var total = 0;
+	    	for (var i = 0; i < data.length; i++) {
+	    		total += parseInt(data[i].timeSpentTotal);
+	    	}
+	    	startTimer(total, display);
+	    	displayTotals(table, data);
+	    });
+    };
+}
