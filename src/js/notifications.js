@@ -12,6 +12,7 @@ setInterval(function() {
 	if (activeDomain) {
 		storage.getOptions(function(options) {
 			if (!options.notifications) { return; } // short circuit if notifications are turned off
+			if (activeDomain.indexOf('.') === -1) { return; } // don't show notifications for options, newtab, etc.
 
 			storage.getDomainEntry(activeDomain, function(obj) {
 				var unrecordedTime = Date.now() - activeStart;

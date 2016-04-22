@@ -99,41 +99,90 @@ function timeToDisplay(t) {
 	return [d , pad(h) , pad(m) , pad(s)];
 }
 
-function loadContent() {
+function updateActivityDisplay() {
+	var activityTabDisplay = document.querySelector('#tab-count');
+	var activityWindowdDisplay = document.querySelector('#window-count');
+
+	chrome.windows.getAll({populate: true}, function(windows) {
+		activityWindowdDisplay.innerHTML = windows.length;
+		var totalTabs = 0;
+		for (var i = 0; i < windows.length; i++) {
+			totalTabs += windows[i].tabs.length;
+		}
+		console.log(totalTabs);
+		activityTabDisplay.innerHTML = totalTabs;
+	});
+};
+
+function loadContent(animate = false) {
 	var display = document.querySelector('#time');
-    // var table = document.querySelector('#table-container');
 
     storage.onDatabaseLoaded(initialize);
 
-    function initialize() {
-    	storage.exportDatabase(function(data) {
-	    	var total = 0;
+	function initialize() {
+		storage.exportDatabase(function(data) {
+			var total = 0;
+			var keyToday = new Date().setHours(0,0,0,0);
 
-	    	// add up total
-	    	for (var i = 0; i < data.length; i++) {
-	    		total += parseInt(data[i].timeSpentTotal);
-	    	}
+			// add up total for today
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].timeSpent[keyToday]) {
+					total += parseInt(data[i].timeSpent[keyToday]);
+				}
+			}
 
-	    	// sort the data for graphing
-	    	data.sort(function(a, b) {
-	    		return b.timeSpentTotal - a.timeSpentTotal;
-	    	});
+			// filter out non-web urls (extensions, newtab, etc.)
+			data = data.filter(function(elem) {
+				return elem.domain.indexOf('.') !== -1;
+			});
 
-	    	// filter out non-web urls (extensions, newtab, etc.)
-	    	data = data.filter(function(elem) {
-	    		return elem.domain.indexOf('.') !== -1;
-	    	});
+			// keep only sites visited today
+			data = data.filter(function(elem) {
+				return elem.timeSpent[keyToday];
+			});
 
-	    	clearTimer(timerHandle);
-	    	timerHandle = startTimer(total, display);
-	    	renderBarChart(data.slice(0,16));
-	    });
-    };
+			// console.log(data.length)
+
+			// sort the data for graphing
+			data.sort(function(a, b) {
+				return parseInt(b.timeSpent[keyToday]) - parseInt(a.timeSpent[keyToday]);
+			});
+
+			clearTimer(timerHandle);
+			timerHandle = startTimer(total, display);
+			renderBarChart(data.slice(0,10), keyToday, animate);
+			renderDonutChart(data, keyToday);
+			updateActivityDisplay();
+		});
+	};
 };
 
 window.onload = function () {
-    loadContent();
+    loadContent(true);
+
+    // document.querySelector('#options').addEventListener('onclick', function() {
+
+    // });
 }
+window.onresize = function() {
+	loadContent();
+}
+
+chrome.windows.onCreated.addListener(function(window) {
+	updateActivityDisplay();
+});
+
+chrome.windows.onRemoved.addListener(function(window) {
+	updateActivityDisplay();
+});
+
+chrome.tabs.onCreated.addListener(function(tab) {
+	updateActivityDisplay();
+});
+
+chrome.tabs.onRemoved.addListener(function(tab) {
+	updateActivityDisplay();
+});
 
 window.addEventListener('focus', function() {
 	loadContent();
